@@ -1,8 +1,13 @@
 import streamlit as st
 import time
 import random
+from streamlit_autorefresh import st_autorefresh
 
-# 초기 세션 상태
+# 자동 새로고침 (1초 간격, 타이머 작동 중일 때만)
+if 'running' in st.session_state and st.session_state.running:
+    st_autorefresh(interval=1000, key="refresh")
+
+# 초기 상태 설정
 if 'running' not in st.session_state:
     st.session_state.running = False
 if 'start_time' not in st.session_state:
@@ -23,7 +28,7 @@ quotes = [
     "계획 없는 목표는 단지 소원일 뿐이다."
 ]
 
-# 타이머 포맷
+# 시간 포맷 함수
 def format_time(seconds):
     mins = seconds // 60
     secs = seconds % 60
@@ -33,20 +38,22 @@ def format_time(seconds):
 st.title("⏱ 공부 타이머 + 명언 생성기")
 st.markdown("집중하고 싶을 때, 한 번에 시작하세요!")
 
-# 명언 표시
+# 명언 출력
 st.info(st.session_state.quote)
 
-# 남은 시간 계산
+# 타이머 계산
 TIMER_SECONDS = 25 * 60
+
 if st.session_state.running:
     st.session_state.elapsed = int(time.time() - st.session_state.start_time)
     remaining = max(TIMER_SECONDS - st.session_state.elapsed, 0)
 else:
     remaining = max(TIMER_SECONDS - st.session_state.elapsed, 0)
 
+# 타이머 출력
 st.header(f"⏳ 남은 시간: {format_time(remaining)}")
 
-# 버튼들
+# 버튼 영역
 col1, col2, col3 = st.columns(3)
 
 with col1:
@@ -69,6 +76,7 @@ with col3:
         st.session_state.elapsed = 0
         st.session_state.quote = "🧠 시작하면 명언이 나옵니다!"
 
-# 타이머 자동 갱신 (주의: 이건 새로고침)
-if st.session_state.running:
-    st.experimental_rerun()
+# 완료 메시지
+if remaining == 0 and st.session_state.running:
+    st.success("🎉 25분 집중 완료! 잠깐 쉬어가요.")
+    st.session_state.running = False
