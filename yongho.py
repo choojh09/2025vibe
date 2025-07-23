@@ -70,3 +70,4 @@ with col3:
 if remaining == 0 and st.session_state.running:
     st.success("🎉 25분 집중 완료! 잠깐 쉬어가요.")
     st.session_state.running = False
+
