@@ -1,72 +1,32 @@
 import streamlit as st
-import time
-import random
-from streamlit_autorefresh import st_autorefresh
+import feedparser
 
-# 자동 새로고침 (1초마다, 타이머가 작동 중일 때만)
-if 'running' in st.session_state and st.session_state.running:
-    st_autorefresh(interval=1000, key="refresh")
+# 뉴스 카테고리와 RSS URL 매핑
+NEWS_SOURCES = {
+    "IT/과학": "https://news.google.com/rss/headlines/section/technology?hl=ko&gl=KR&ceid=KR:ko",
+    "사회": "https://news.google.com/rss/headlines/section/topic/NATION?hl=ko&gl=KR&ceid=KR:ko",
+    "경제": "https://news.google.com/rss/headlines/section/topic/BUSINESS?hl=ko&gl=KR&ceid=KR:ko",
+    "세계": "https://news.google.com/rss/headlines/section/topic/WORLD?hl=ko&gl=KR&ceid=KR:ko"
+}
 
-# 초기화
-if 'running' not in st.session_state:
-    st.session_state.running = False
-if 'start_time' not in st.session_state:
-    st.session_state.start_time = None
-if 'elapsed' not in st.session_state:
-    st.session_state.elapsed = 0
-if 'quote' not in st.session_state:
-    st.session_state.quote = "🧠 시작하면 명언이 나옵니다!"
+# 페이지 기본 설정
+st.set_page_config(page_title="오늘의 뉴스 큐레이터", layout="centered")
+st.title("🗞️ 오늘의 뉴스 큐레이터")
+st.markdown("최신 뉴스 헤드라인을 모아 보여드립니다.")
 
-quotes = [
-    "작은 성취도 반복되면 큰 성공이 된다.",
-    "오늘 걷지 않으면 내일은 뛰어야 한다.",
-    "포기하지 마라. 끝까지 해보자.",
-    "지금 흘리는 땀이 내일의 성적을 만든다.",
-    "노력은 배신하지 않는다.",
-    "지금 이 순간이 가장 중요하다.",
-    "계획 없는 목표는 단지 소원일 뿐이다."
-]
+# 카테고리 선택
+category = st.selectbox("뉴스 카테고리 선택", list(NEWS_SOURCES.keys()))
+rss_url = NEWS_SOURCES[category]
 
-def format_time(seconds):
-    mins = seconds // 60
-    secs = seconds % 60
-    return f"{mins:02}:{secs:02}"
+# 뉴스 가져오기
+feed = feedparser.parse(rss_url)
 
-st.set_page_config(page_title="공부 타이머", layout="centered")
-st.title("⏱ 공부 타이머 + 명언 생성기")
-st.info(st.session_state.quote)
+# 헤드라인 출력
+st.subheader(f"📌 {category} 뉴스 헤드라인")
+for entry in feed.entries[:10]:
+    st.markdown(f"### [{entry.title}]({entry.link})")
+    if hasattr(entry, 'summary'):
+        st.caption(entry.summary[:100] + "..." if len(entry.summary) > 100 else entry.summary)
 
-# 타이머 계산
-TIMER_SECONDS = 25 * 60
-if st.session_state.running:
-    st.session_state.elapsed = int(time.time() - st.session_state.start_time)
-    remaining = max(TIMER_SECONDS - st.session_state.elapsed, 0)
-else:
-    remaining = max(TIMER_SECONDS - st.session_state.elapsed, 0)
-
-st.header(f"⏳ 남은 시간: {format_time(remaining)}")
-
-# 버튼
-col1, col2, col3 = st.columns(3)
-with col1:
-    if st.button("▶️ 시작"):
-        if not st.session_state.running:
-            st.session_state.running = True
-            st.session_state.start_time = time.time() - st.session_state.elapsed
-            st.session_state.quote = "💬 " + random.choice(quotes)
-with col2:
-    if st.button("⏸ 일시정지"):
-        if st.session_state.running:
-            st.session_state.running = False
-            st.session_state.elapsed = int(time.time() - st.session_state.start_time)
-with col3:
-    if st.button("🔄 리셋"):
-        st.session_state.running = False
-        st.session_state.start_time = None
-        st.session_state.elapsed = 0
-        st.session_state.quote = "🧠 시작하면 명언이 나옵니다!"
-
-# 종료 메시지
-if remaining == 0 and st.session_state.running:
-    st.success("🎉 25분 집중 완료! 잠깐 쉬어가요.")
-    st.session_state.running = False
+st.markdown("---")
+st.caption("뉴스 제공: Google News RSS | 제작: ChatGPT")
