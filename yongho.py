@@ -1,13 +1,8 @@
 import streamlit as st
 import time
 import random
-from streamlit_autorefresh import st_autorefresh
 
-# 자동 새로고침 (1초 간격, 타이머 작동 중일 때만)
-if 'running' in st.session_state and st.session_state.running:
-    st_autorefresh(interval=1000, key="refresh")
-
-# 초기 상태 설정
+# 초기 상태
 if 'running' not in st.session_state:
     st.session_state.running = False
 if 'start_time' not in st.session_state:
@@ -17,7 +12,6 @@ if 'elapsed' not in st.session_state:
 if 'quote' not in st.session_state:
     st.session_state.quote = "🧠 시작하면 명언이 나옵니다!"
 
-# 명언 리스트
 quotes = [
     "작은 성취도 반복되면 큰 성공이 된다.",
     "오늘 걷지 않으면 내일은 뛰어야 한다.",
@@ -28,20 +22,14 @@ quotes = [
     "계획 없는 목표는 단지 소원일 뿐이다."
 ]
 
-# 시간 포맷 함수
 def format_time(seconds):
     mins = seconds // 60
     secs = seconds % 60
     return f"{mins:02}:{secs:02}"
 
-# 타이틀
 st.title("⏱ 공부 타이머 + 명언 생성기")
-st.markdown("집중하고 싶을 때, 한 번에 시작하세요!")
-
-# 명언 출력
 st.info(st.session_state.quote)
 
-# 타이머 계산
 TIMER_SECONDS = 25 * 60
 
 if st.session_state.running:
@@ -50,10 +38,8 @@ if st.session_state.running:
 else:
     remaining = max(TIMER_SECONDS - st.session_state.elapsed, 0)
 
-# 타이머 출력
 st.header(f"⏳ 남은 시간: {format_time(remaining)}")
 
-# 버튼 영역
 col1, col2, col3 = st.columns(3)
 
 with col1:
@@ -62,12 +48,14 @@ with col1:
             st.session_state.running = True
             st.session_state.start_time = time.time() - st.session_state.elapsed
             st.session_state.quote = "💬 " + random.choice(quotes)
+            st.experimental_rerun()
 
 with col2:
     if st.button("⏸ 일시정지"):
         if st.session_state.running:
             st.session_state.running = False
             st.session_state.elapsed = int(time.time() - st.session_state.start_time)
+            st.experimental_rerun()
 
 with col3:
     if st.button("🔄 리셋"):
@@ -75,8 +63,8 @@ with col3:
         st.session_state.start_time = None
         st.session_state.elapsed = 0
         st.session_state.quote = "🧠 시작하면 명언이 나옵니다!"
+        st.experimental_rerun()
 
-# 완료 메시지
 if remaining == 0 and st.session_state.running:
     st.success("🎉 25분 집중 완료! 잠깐 쉬어가요.")
     st.session_state.running = False
