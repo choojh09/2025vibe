@@ -1,2 +1,2 @@
 streamlit
-feedparser
+$ pip install feedparser
