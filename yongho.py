@@ -39,21 +39,14 @@ with tab1:
     selected_category = st.selectbox("뉴스 카테고리 선택", list(NEWS_CATEGORIES.keys()))
     render_news(NEWS_CATEGORIES[selected_category])
 
-# ✅ 탭 2: 언론사별 뉴스
+# ✅ 탭 2: 언론사별 뉴스 (요청에 따라 필터링된 버전)
 with tab2:
     st.subheader("언론사를 선택하세요")
     PRESS_RSS = {
         "조선일보": "https://www.chosun.com/arc/outboundfeeds/rss/?outputType=xml",
-        "중앙일보 (정치)": "https://www.joongang.co.kr/rss/news/politics.xml",
         "동아일보": "https://rss.donga.com/total.xml",
-        "한겨레": "https://www.hani.co.kr/rss/",
         "경향신문": "https://www.khan.co.kr/rss/rssdata/total_news.xml",
-        "연합뉴스": "https://www.yna.co.kr/rss/all.xml",
-        "YTN": "https://www.ytn.co.kr/rss/news_rss.xml",
-        "MBC": "https://imnews.imbc.com/rss/news.xml",
-        "SBS": "https://news.sbs.co.kr/news/SectionRssFeed.do?sectionId=01",
-        "KBS": "https://news.kbs.co.kr/rss/rss.xml",
-        "한국경제": "https://www.hankyung.com/rss/news.xml"
+        "SBS": "https://news.sbs.co.kr/news/SectionRssFeed.do?sectionId=01"
     }
     selected_press = st.selectbox("언론사 선택", list(PRESS_RSS.keys()))
     render_news(PRESS_RSS[selected_press])
