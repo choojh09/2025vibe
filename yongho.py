@@ -1,6 +1,7 @@
 import streamlit as st
 import time
 import random
+pip install streamlit_autorefresh
 
 # 초기 상태
 if 'running' not in st.session_state:
